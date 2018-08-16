@@ -79,7 +79,7 @@ self.addEventListener('push', e => {
 	const title = 'Push Notification Demo'
 	const options = {
 		body: 'Click para regresar a la aplicación',
-		icon: './img/icon_192x192.png'
+		icon: './img/icon_192x192.png',
 		//vibrate: [100, 50, 100],
 		//data: { id:1 }
 		// actions: [
@@ -104,4 +104,21 @@ self.addEventListener('notificationclick', e => {
 		console.log('No me gusta esta aplicacion')
 	}
 	e.notification.close()
+})
+
+self.addEventListener('sync', e => {
+	console.log('Evento: Sincronizacion de Fondo', e)
+
+	//Revisar que la etiqueta de sincronizacion sea la definida o la que emulan los devtools
+	if (e.tag === 'github' || e.tag === 'test-tag-from-devtools'){
+		e.waitUntil(
+			self.clients.matchAll()
+				.then( all => {
+					return all.map(client => {
+						return client.postMessage('online')
+					})
+				})
+				.catch(err => console.log(err))
+		)
+	}	
 })
