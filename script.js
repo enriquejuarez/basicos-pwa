@@ -1,3 +1,4 @@
+;
 /*Funciones auto invocadas*/
 
 //Registro de caracteristicas de PWA's
@@ -30,12 +31,30 @@
 			n.serviceWorker.ready
 				.then(registration => {
 					return registration.sync.register('github')
-						.then( () => c('Sincronizacion de fondo registrada'))
+						.then( () => c('Sincronizacion de fondo registradas'))
 						.catch( err => c('Fallo la sincronizacion de fondo', err))
 				})
 		}
 		registerBGSync()
 	}
+	//Compartiendo contenido con el API Share
+	if (n.share !== undefined){
+		 d.addEventListener('DOMContentLoaded', e => {
+		 	let shareBtn = d.getElementById('share')
+
+		 	shareBtn.addEventListener('click', e => {
+		 		console.log("Hola")
+		 		n.share({
+		 				title: d.title,
+		 				text: 'Hola soy un contenido para compartir',
+		 				url: w.location.href,
+		 			})
+		 			.then( () => c('Contenido compartido con éxito'))
+		 			.catch(err => c('Error al compartir', err))
+		 	})
+		 })
+	}
+
 })(document, window, navigator, console.log);
 
 
@@ -76,6 +95,10 @@
 		fetch(url, {method: 'GET'})
 			.then(response => response.json())
 			.then(userData => {
+			if(!requestFromBGSSync){
+				localStorage.removeItem('github')
+			}
+
 				let template = `
 					<article class="GitHubUser-info">
 						<h2>${userData.name}</h2>
@@ -92,12 +115,29 @@
 				`
 				userInfo.innerHTML =  template
 			})
-			.catch(err => {console.log(err)})
+			.catch(err => {
+				//Si el usuario esta offline y envia una peticion, esta se almacenara en localStorage
+				//Una vez que el usuario este online, se activara la sincronizacion de fondo para recuperar la peticion fallida
+				localStorage.setItem('github', name)
+				c(err)
+			})
 	}	  
-	fetchGitHubUser()
+	fetchGitHubUser(localStorage.getItem('github'))
 
-})(document, window, navigator, console.log);
+	searchForm.addEventListener('submit', e =>{
+		e.preventDefault()
 
-((d, w, n, c) => {
+		let user = d.getElementById('search').value
+		if (user === '') return
+		localStorage.setItem('github', user)
+		fetchGitHubUser(user)
+
+		e.target.reset()
+	})
+
+	// n.serviceWorker('message', e => {
+	// 	console.log('Desde la sincronizacion de Fondo', e.data)
+	// 	fetchGitHubuser(localStorage.getItem('github'), true)
+	// })
 
 })(document, window, navigator, console.log);

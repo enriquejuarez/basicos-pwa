@@ -122,3 +122,8 @@ self.addEventListener('sync', e => {
 		)
 	}	
 })
+
+// self.addEventListener('message', e => {
+// 	console.log('Desde la sincronizacion de Fondo', e.data)
+// 	fetchGitHubuser(localStorage.getItem('github'), true)
+// })
